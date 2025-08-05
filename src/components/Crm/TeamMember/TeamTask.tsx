@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
-import { Trash2, Edit, Plus, ChevronDown, Calendar, Loader2, X, ChevronRight, ChevronUp } from "lucide-react"
+import React, { useState, useEffect, useRef } from "react"
+import { Trash2, Edit, Plus, ChevronDown, Calendar, Loader2, X, ChevronRight, ChevronUp, Bell } from "lucide-react"
 import axios from "axios"
 import icon from "../Admin/AdminClient/Vector.png"
 import { sendTaskAssignmentEmail, sendSubtaskAssignmentEmail } from "../../../utils/emailService"
@@ -112,6 +112,15 @@ const TeamTask: React.FC = () => {
     assigneeId: "",
   })
 
+  const [notifications, setNotifications] = useState<{ id: string, title: string, project: string, assignedAt: string }[]>(() => {
+    // Load notifications from localStorage if available
+    const saved = localStorage.getItem("teamTaskNotifications");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const prevTaskIdsRef = useRef<Set<string>>(new Set());
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(() => notifications.length)
+
   // Get userId from localStorage on component mount
   useEffect(() => {
     const userId = localStorage.getItem("userId")
@@ -122,6 +131,16 @@ const TeamTask: React.FC = () => {
       setError("User ID not found. Please login again.")
     }
   }, [])
+
+  // Save notifications to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem("teamTaskNotifications", JSON.stringify(notifications));
+  }, [notifications]);
+
+  // Mark notifications as read when opened
+  useEffect(() => {
+    if (showNotifications) setUnreadCount(0)
+  }, [showNotifications])
 
   // Fetch data on component mount
   useEffect(() => {
@@ -184,6 +203,23 @@ const TeamTask: React.FC = () => {
         setAllTasks(allProjectTasks)
         setTasks(allProjectTasks)
       }
+
+      // Notification logic: detect new tasks assigned to current user
+      const newTaskIds = new Set(allProjectTasks.map(t => t.id));
+      const prevTaskIds = prevTaskIdsRef.current;
+      const newTasks = allProjectTasks.filter(t => !prevTaskIds.has(t.id) && t.assigneeId === currentUserId);
+      if (newTasks.length > 0) {
+        setNotifications(prev => [
+          ...newTasks.map(task => ({
+            id: task.id,
+            title: task.title,
+            project: projectsResponse.data.find((p: Project) => p.id === task.projectId)?.title || 'Unknown Project',
+            assignedAt: task.createdAt || new Date().toISOString(),
+          })),
+          ...prev,
+        ]);
+      }
+      prevTaskIdsRef.current = newTaskIds;
 
       setLoading(false)
     } catch (err) {
@@ -759,7 +795,8 @@ const TeamTask: React.FC = () => {
   
 
   return (
-    <div className="min-h-screen bg-pink-50 p-6">
+    <div className="space-y-6 min-h-screen bg-pink-50 p-6">
+      {/* Notification Section removed as per new design. All notifications are now in the main header. */}
       <div className="max-w-6xl mx-auto">
         {/* Header with title and icon */}
         <div className="mb-8">

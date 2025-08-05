@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Menu, Bell, Sun, Moon, Settings, LogOut } from "lucide-react";
+import { Menu, Bell, Sun, Moon, Settings, LogOut, Plus } from "lucide-react";
 import profile from '../Admin/assets/assets/profile.png';
 import { useNavigate } from "react-router-dom";
 
@@ -42,6 +42,15 @@ export default function Navbar({
   const [newActivitiesCount, setNewActivitiesCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // TeamTask notification bell state
+  const [showTaskNotifications, setShowTaskNotifications] = useState(false);
+  const [taskNotifications, setTaskNotifications] = useState(() => {
+    const saved = localStorage.getItem("teamTaskNotifications");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [unreadTaskCount, setUnreadTaskCount] = useState(() => taskNotifications.length);
+  const taskNotificationRef = useRef<HTMLDivElement>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -136,6 +145,21 @@ export default function Navbar({
   }, [showNotifications]);
 
   useEffect(() => {
+    // Listen for notification changes in localStorage (from TeamTask page)
+    const handleStorage = () => {
+      const saved = localStorage.getItem("teamTaskNotifications");
+      setTaskNotifications(saved ? JSON.parse(saved) : []);
+      setUnreadTaskCount(saved ? JSON.parse(saved).length : 0);
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  useEffect(() => {
+    if (showTaskNotifications) setUnreadTaskCount(0);
+  }, [showTaskNotifications]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
@@ -148,6 +172,12 @@ export default function Navbar({
         !notificationRef.current.contains(event.target as Node)
       ) {
         setShowNotifications(false);
+      }
+      if (
+        taskNotificationRef.current &&
+        !taskNotificationRef.current.contains(event.target as Node)
+      ) {
+        setShowTaskNotifications(false);
       }
     };
 
@@ -170,6 +200,11 @@ export default function Navbar({
     if (diffInSeconds < 86400)
       return `${Math.floor(diffInSeconds / 3600)}h ago`;
     return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
   };
 
   return (
@@ -199,8 +234,54 @@ export default function Navbar({
             )}
           </button>
 
-          <div className="relative" ref={notificationRef}>
-            {/* <button
+          {/* TeamTask Notification Bell (only for team role) */}
+          {userRole === "team" && (
+            <div className="relative" ref={taskNotificationRef}>
+              <button
+                className="relative focus:outline-none"
+                aria-label="Show task notifications"
+                onClick={() => setShowTaskNotifications((prev) => !prev)}
+              >
+                <Bell className="w-6 h-6 text-gray-800 dark:text-gray-200 mx-3" />
+                {unreadTaskCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 font-bold">
+                    {unreadTaskCount}
+                  </span>
+                )}
+              </button>
+              {/* Notification Dropdown with animation and improved design */}
+              <div
+                className={`absolute right-0 mt-10 w-[320px] max-w-[90vw] z-50 transition-all duration-500 ease-in-out \
+                ${showTaskNotifications ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-4 pointer-events-none'} \
+              `}
+                style={{ minWidth: 320 }}
+              >
+                <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-blue-200 ring-1 ring-blue-100 animate-fade-in-down p-4">
+                  <h2 className="text-lg font-semibold text-gray-800 mb-2">Notifications</h2>
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {taskNotifications.length > 0 ? (
+                      taskNotifications.map((notif: any) => (
+                        <div key={notif.id} className="flex flex-col bg-gray-50 rounded p-3 shadow-sm">
+                          <span className="font-medium text-gray-900">{notif.title}</span>
+                          <span className="text-xs text-gray-500">{notif.project}</span>
+                          <span className="text-[10px] text-gray-400">{formatDate(notif.assignedAt)}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center text-gray-400 py-8">
+                        <Bell size={32} className="mx-auto mb-2" />
+                        <div>No notifications</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Recent Activities Notification Bell (if uncommented) */}
+          {/* <div className="relative" ref={notificationRef}>
+            <button
               onClick={handleNotificationClick}
               className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg relative"
             >
@@ -213,7 +294,7 @@ export default function Navbar({
                   {newActivitiesCount}
                 </span>
               )}
-            </button> */}
+            </button>
 
             {showNotifications && (
               <div className="fixed sm:absolute left-0 sm:left-auto right-0 sm:right-0 top-16 sm:top-auto sm:mt-2 w-full sm:w-80 bg-white dark:bg-gray-800 shadow-lg py-1 z-50 sm:rounded-lg sm:border border-gray-200 dark:border-gray-700 max-h-[70vh] sm:max-h-96 overflow-y-auto">
@@ -261,7 +342,7 @@ export default function Navbar({
                 )}
               </div>
             )}
-          </div>
+          </div> */}
 
           <div className="relative" ref={dropdownRef}>
             <button

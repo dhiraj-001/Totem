@@ -8,6 +8,7 @@ import {
   X,
   Home,
   UserRoundCheck,
+  Bell,
 } from "lucide-react";
 
 import profile from '../../Admin/assets/assets/profile.png'
@@ -30,6 +31,35 @@ export default function Sidebar({
     Projects: false,
   });
   
+  // Notification bell state
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState(() => {
+    const saved = localStorage.getItem("teamTaskNotifications");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [unreadCount, setUnreadCount] = useState(() => notifications.length);
+
+  useEffect(() => {
+    // Listen for notification changes in localStorage (from TeamTask page)
+    const handleStorage = () => {
+      const saved = localStorage.getItem("teamTaskNotifications");
+      setNotifications(saved ? JSON.parse(saved) : []);
+      setUnreadCount(saved ? JSON.parse(saved).length : 0);
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  useEffect(() => {
+    if (showNotifications) setUnreadCount(0);
+  }, [showNotifications]);
+
+  // Format date utility
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+  };
+
   useEffect(() => {
     // Only block scrolling on mobile when sidebar is open
     if (sidebarOpen && window.innerWidth < 1024) { // 1024px is lg breakpoint in Tailwind
@@ -74,7 +104,7 @@ export default function Sidebar({
         w-[240px] shadow-lg z-50 flex flex-col`}
     >
       {/* Header */}
-      <div className="flex items-center p-6 h-20">
+      <div className="flex items-center p-6 h-20 relative">
         <Link to={roleBasePath} className="flex items-center">
           <div className="h-10 w-8 mr-3">
             <img src={profile} alt="Totem" className="h-full w-full" />
@@ -85,7 +115,7 @@ export default function Sidebar({
         </Link>
         <button
           onClick={() => setSidebarOpen(false)}
-          className="ml-auto lg:hidden text-gray-500 hover:text-gray-700"
+          className="ml-2 lg:hidden text-gray-500 hover:text-gray-700"
         >
           <X size={20} />
         </button>
