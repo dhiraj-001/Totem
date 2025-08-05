@@ -14,6 +14,7 @@ import Settings from "./components/Admin/SidebarContents/Settings";
 import ContactForm from "./components/Admin/SidebarContents/ContactForm";
 import Testimonials from "./components/home/Testimonials";
 import TestimonialManager from "./components/Admin/SidebarContents/Testimonial";
+import Contacts from "./components/Admin/SidebarContents/Contacts";
 
 interface LayoutProps {
   darkMode: boolean;
@@ -68,7 +69,7 @@ const AdminRoutes = ({ darkMode, setDarkMode }: LayoutProps) => {
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/new-project" element={<Project />} />
               <Route path="/certificate" element={<Certificate />} />
-              <Route path="/admin-contact" element={<ContactForm />} />
+              <Route path="/admin-contact" element={<Contacts />} />
               <Route path="/testimonial" element={<TestimonialManager />} />
               <Route path="/recent-activity" element={<RecentActivity />} />
               <Route path="/settings" element={<Settings />} />

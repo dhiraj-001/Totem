@@ -142,7 +142,7 @@ export default function Sidebar({
           onClick={() => setSidebarOpen(false)}
         >
           <Contact size={20} />
-          <span className="ml-3">Contact</span>
+          <span className="ml-3">Contact & Leads</span>
         </Link>
         <Link
           to="/admin/testimonial"
