@@ -199,6 +199,22 @@ export default function Sidebar({
             />
             <span className="ml-3">Team</span>
           </Link>
+
+          {/* Invoice PDF Generator Link - only for admin */}
+          {userRole === 'admin' && (
+            <Link
+              to="/crm/admin/invoice-pdf-generator"
+              className={`group flex items-center w-full px-10 py-2 rounded-lg transition-colors mb-1 ${
+                currentPath === '/crm/invoice-pdf-generator'
+                  ? "font-medium text-gray-700 dark:text-white"
+                  : "text-gray-600 dark:text-gray-300 hover:bg-black hover:text-white"
+              }`}
+              onClick={() => setSidebarOpen(false)}
+            >
+              <FileText size={18} className={currentPath === '/crm/invoice-pdf-generator' ? "font-extrabold" : "group-hover:text-white"} />
+              <span className="ml-3">Invoice </span>
+            </Link>
+          )}
         </div>
         
         {/* HR Section */}
@@ -309,7 +325,7 @@ export default function Sidebar({
           <Link
             to={`${roleBasePath}/attendance`}
             className={`group flex items-center w-full px-10 py-2 rounded-lg transition-colors mb-1 ${
-              currentPath.includes('/attendance')
+              currentPath.includes('attendance')
                 ? "font-medium text-gray-700 dark:text-white"
                 : "text-gray-600 dark:text-gray-300 hover:bg-black hover:text-white"
             }`}

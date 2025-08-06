@@ -55,6 +55,7 @@ import ManagerAttendance from "./components/Crm/Manager/ManagerAttendance";
 import Team4 from "./components/Crm/Admin/AdminTeam/Team4";
 import Team5 from "./components/Crm/Admin/AdminTeam/Team5";
 import Team6 from "./components/Crm/Admin/AdminTeam/Team6";
+import InvoicePDFGenerator from "./components/Crm/Admin/InvoicePDFGenerator";
 
 
 interface LayoutProps {
@@ -185,6 +186,15 @@ const CrmRoutes = ({ darkMode, setDarkMode }: LayoutProps) => {
               <Route path="/admin/contract" element={<Contract />} />
               <Route path="/admin/attendance" element={<AdminAttendance />} />
               <Route path="/admin/settings" element={<Settings />} />
+              {/* Invoice PDF Generator route - only for admin */}
+              <Route path="/admin/invoice-pdf-generator" element={
+                userRole === 'admin' ? (
+                  <InvoicePDFGenerator />
+                ) : (
+                  <Navigate to={ROLE_BASE_PATHS[userRole || "admin"]} replace />
+                )
+              } />
+              
 
               {/* Manager Routes */}
               <Route path="/manager/dashboard" element={<ManagerDashboard />} />
@@ -213,7 +223,7 @@ const CrmRoutes = ({ darkMode, setDarkMode }: LayoutProps) => {
               <Route path="/team/personal-details/:id" element={<ClientProfile />} />
               <Route path="/team/projects" element={<TeamProject />} />
               <Route path="/team/task" element={<TeamTask />} />
-              
+
               
               {/* Default Redirect */}
               <Route

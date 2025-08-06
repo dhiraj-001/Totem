@@ -15,6 +15,7 @@ import ContactForm from "./components/Admin/SidebarContents/ContactForm";
 import Testimonials from "./components/home/Testimonials";
 import TestimonialManager from "./components/Admin/SidebarContents/Testimonial";
 import Contacts from "./components/Admin/SidebarContents/Contacts";
+import InvoicePDFGenerator from "./components/Crm/Admin/InvoicePDFGenerator";
 
 interface LayoutProps {
   darkMode: boolean;
@@ -73,6 +74,7 @@ const AdminRoutes = ({ darkMode, setDarkMode }: LayoutProps) => {
               <Route path="/testimonial" element={<TestimonialManager />} />
               <Route path="/recent-activity" element={<RecentActivity />} />
               <Route path="/settings" element={<Settings />} />
+              
             </Routes>
           </div>
         </main>
